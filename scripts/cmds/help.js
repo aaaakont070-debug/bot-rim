@@ -1,4 +1,4 @@
-Const fs = require("fs-extra");
+const fs = require("fs-extra");
 const path = require("path");
 const https = require("https");
 
@@ -146,7 +146,6 @@ module.exports = {
         `╰┈─────┈─ ─┈────┈╯\n\n` +
         `🪷 𝐍𝐚𝐦𝐞: ${toFont(name)}
         `🪷 𝐂𝐚𝐭𝐞𝐠𝐨𝐫𝐲: ${toFont(category || "General")}\n` +
-       ` msg += `╭┈─┈━[🌸 ${toFont(cat)} ]\n`;
         ` 🪷 𝐀𝐥𝐢𝐚𝐬𝐞𝐬: ${aliases?.length ? aliases.join(", ") : "None"}\n` +
         ` 🪷 𝐕𝐞𝐫𝐬𝐢𝐨𝐧: ${version || "1.0"}\n` +
         ` 🪷 𝐀𝐮𝐭𝐡𝐨𝐫: ${author || "S1FU"}\n\n` +
