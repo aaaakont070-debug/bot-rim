@@ -42,10 +42,10 @@ module.exports = {
 			const tmpPath = path.join(tmpDir, `ai_girl_voice_${Date.now()}.mp3`);
 
 			// 🔑 ضع مفتاح الـ API الخاص بك هنا بين العلامتين
-			const apiKey = "sk_72c3c6017d02413a07282e4cb45d22c62c404c261fb77c04";
+			const apiKey = "sk_c5ca42838d3c5d431343386551b5b30a020a3622d6056704";
 			
 			// 🎙️ ضع معرف الصوت النسائي (Voice ID) هنا بين العلامتين
-			const voiceId = "4wfI0IgibMnboGJGCLrP";
+			const voiceId = "a1KZUXKFVFDOb33I1uqr";
 
 			const response = await axios({
 				method: "post",
