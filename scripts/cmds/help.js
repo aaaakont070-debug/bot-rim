@@ -2,12 +2,31 @@ const fs = require("fs-extra");
 const path = require("path");
 const https = require("https");
 
-const smallCapsMap = {
-  a:'ᴀ', b:'ʙ', c:'ᴄ', d:'ᴅ', e:'ᴇ', f:'ꜰ',
-  g:'ɢ', h:'ʜ', i:'ɪ', j:'ᴊ', k:'ᴋ', l:'ʟ',
-  m:'ᴍ', n:'ɴ', o:'ᴏ', p:'ᴘ', q:'ǫ', r:'ʀ',
-  s:'ꜱ', t:'ᴛ', u:'ᴜ', v:'ᴠ', w:'ᴡ', x:'x',
-  y:'ʏ', z:'ᴢ'
+const boldMap = {
+  a:'𝗮', b:'𝗯', c:'𝗰', d:'𝗱', e:'𝗲',
+  f:'𝗳', g:'𝗴', h:'𝗵', i:'𝗶', j:'𝗷',
+  k:'𝗸', l:'𝗹', m:'𝗺', n:'𝗻', o:'𝗼',
+  p:'𝗽', q:'𝗾', r:'𝗿', s:'𝘀', t:'𝘁',
+  u:'𝘂', v:'𝘃', w:'𝘄', x:'𝘅', y:'𝘆',
+  z:'𝘇'
+};
+
+const cmdFontMap = {
+  ...boldMap,
+  '0':'𝟬',
+  '1':'𝟭',
+  '2':'𝟮',
+  '3':'𝟯',
+  '4':'𝟰',
+  '5':'𝟱',
+  '6':'𝟲',
+  '7':'𝟳',
+  '8':'𝟴',
+  '9':'𝟵'
+};
+
+const toFont = text =>
+  text.toLowerCase().split("").map(c => cmdFontMap[c] || c).join("");
 };
 
 const cmdFontMap = {
