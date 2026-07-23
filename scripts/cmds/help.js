@@ -144,8 +144,8 @@ module.exports = {
         `╭┈─────┈─ ─┈────┈╮\n` +
         `  🌸 𝗖𝗢𝗠𝗠𝗔𝗡𝗗 𝗜𝗡𝗙𝗢 🌸\n` +
         `╰┈─────┈─ ─┈────┈╯\n\n` +
-        ` 🪷 𝐍𝐚𝐦𝐞: ${toSmallCaps(name)}\n` +
-        ` 🪷 𝐂𝐚𝐭𝐞𝐠𝐨𝐫𝐲: ${toSmallCaps(category || "General")}\n` +
+        ` 🪷 𝐍𝐚𝐦𝐞: ${toFont(name)}\n` +
+        ` 🪷 𝐂𝐚𝐭𝐞𝐠𝐨𝐫𝐲: ${toFont(category || "General")}\n` +
         ` 🪷 𝐀𝐥𝐢𝐚𝐬𝐞𝐬: ${aliases?.length ? aliases.join(", ") : "None"}\n` +
         ` 🪷 𝐕𝐞𝐫𝐬𝐢𝐨𝐧: ${version || "1.0"}\n` +
         ` 🪷 𝐀𝐮𝐭𝐡𝐨𝐫: ${author || "S1FU"}\n\n` +
@@ -170,7 +170,7 @@ module.exports = {
       msg += `╭┈─┈━[🌸 ${tofont(cat)} ]\n`;
       const commands = categoriesList[cat].sort();
       for (let i = 0; i < commands.length; i += 2) {
-        const a = tofont(commands[i]);
+        const a = toFont(commands[i]);
         const b = commands[i + 1] ? toCmdFont(commands[i + 1]) : null;
         msg += b ? `┋⌬ ${a.padEnd(12)} ⌬ ${b}\n` : `┋⌬ ${a}\n`;
       }
