@@ -8,7 +8,7 @@ const boldMap = {
   a: "𝗮", b: "𝗯", c: "𝗰", d: "𝗱", e: "𝗲",
   f: "𝗳", g: "𝗴", h: "𝗵", i: "𝗶", j: "𝗷",
   k: "𝗸", l: "𝗹", m: "𝗺", n: "𝗻", o: "𝗼",
-  p: "𝗽", q: "𝗾", r: "𝘀", s: "𝘀", t: "𝘁",
+  p: "𝗽", q: "𝗾", r: "𝗿", s: "𝘀", t: "𝘁",
   u: "𝘂", v: "𝘃", w: "𝘄", x: "𝘅", y: "𝘆",
   z: "𝘇"
 };
@@ -27,12 +27,13 @@ const cmdFontMap = {
   "9": "𝟵"
 };
 
-const toFont = text =>
-  String(text || "")
+function toFont(text) {
+  return String(text || "")
     .toLowerCase()
     .split("")
     .map(char => cmdFontMap[char] || char)
     .join("");
+}
 
 const gifURLs = [
   "https://i.giphy.com/media/ZOGCyj0NW28gg/giphy.gif",
@@ -70,91 +71,48 @@ const gifURLs = [
 // عدد الأوامر في كل صفحة
 const COMMANDS_PER_PAGE = 10;
 
-
-function cleanCategoryName(text) {
-  if (!text) return "OTHERS";
-
-  return String(text)
-    .normalize("NFKD")
-    .replace(/[^\w\s-]/g, "")
-    .replace(/\s+/g, " ")
-    .trim()
-    .toUpperCase();
-}
+// عدد صفحات الاختصار /help2 إلى /help15
+const MAX_PAGE_ALIAS = 15;
 
 
 function getAllCommands() {
   const commands = [];
 
   for (const [name, cmd] of global.GoatBot.commands) {
-    if (!cmd?.config) continue;
+    if (!cmd || !cmd.config) continue;
 
-    if (name.toLowerCase() === "help") continue;
+    const commandName = String(name).toLowerCase();
+
+    if (commandName === "help") continue;
 
     commands.push({
-      name,
-      category: cleanCategoryName(cmd.config.category)
+      name: String(name)
     });
   }
 
   return commands.sort((a, b) =>
-    a.name.localeCompare(b.name)
+    a.name.localeCompare(
+      b.name,
+      "en",
+      {
+        sensitivity: "base"
+      }
+    )
   );
 }
 
 
-async function getHelpGif() {
-  const cacheDir = path.join(__dirname, "cache");
+function centerText(text, width) {
+  text = String(text);
 
-  if (!fs.existsSync(cacheDir)) {
-    fs.mkdirSync(cacheDir, {
-      recursive: true
-    });
-  }
-
-  const indexFile = path.join(
-    cacheDir,
-    "help_gif_index.json"
+  const spaces = Math.max(
+    0,
+    Math.floor(
+      (width - text.length) / 2
+    )
   );
 
-  let index = 0;
-
-  if (fs.existsSync(indexFile)) {
-    try {
-      const savedData = JSON.parse(
-        fs.readFileSync(indexFile, "utf8")
-      );
-
-      index =
-        (Number(savedData.index || 0) + 1) %
-        gifURLs.length;
-
-    } catch {
-      index = 0;
-    }
-  }
-
-  fs.writeFileSync(
-    indexFile,
-    JSON.stringify({ index })
-  );
-
-  const gifPath = path.join(
-    cacheDir,
-    `help_gif_${index}.gif`
-  );
-
-  if (
-    !fs.existsSync(gifPath) ||
-    fs.statSync(gifPath).size === 0
-  ) {
-    await downloadFile(
-      gifURLs[index],
-      gifPath
-    );
-  }
-
-  return gifPath;
+  return " ".repeat(spaces) + text;
 }
 
 
@@ -173,23 +131,43 @@ function createPageMessage(
       start + COMMANDS_PER_PAGE
     );
 
-  let msg =
-    "╭┈─────┈──┈─────┈╮\n" +
-    "       🌸 𝐁𝐎𝐓 𝐌𝐄𝐍𝐔 🌸\n" +
-    "╰┈─────┈──┈─────┈╯\n\n";
+  /*
+    العرض التقريبي في وسط رسالة Messenger.
+    Messenger لا يدعم محاذاة حقيقية،
+    لذلك نستخدم مسافات ثابتة.
+  */
+  const MENU_WIDTH = 30;
 
+  let msg = "";
+
+  // العنوان في الوسط
+  msg +=
+    centerText(
+      "commands list",
+      MENU_WIDTH
+    ) +
+    "\n\n";
+
+  // الأوامر في الوسط
   for (const command of pageCommands) {
+    const commandText =
+      `${prefix}${command.name}`;
+
     msg +=
-      `⌬ ${prefix}${toFont(command.name)}\n`;
+      centerText(
+        commandText,
+        MENU_WIDTH
+      ) +
+      "\n";
   }
 
+  // رقم الصفحة في الوسط
   msg +=
-    "\n╭┈───────┈┈ ೄྀ࿐┐\n" +
-    ` 🍄 𝐓𝐨𝐭𝐚𝐥: ${commands.length}\n` +
-    ` 🎀 𝐏𝐫𝐞𝐟𝐢𝐱: ${prefix}\n` +
-    ` 🌸 〈 𝐩𝐚𝐠𝐞 ${page}/${totalPages} 〉\n` +
-    " 🌸𝐒𝐭𝐚𝐲 𝐇𝐚𝐩𝐩𝐲 & 𝐁𝐞𝐚𝐮𝐭𝐢𝐟𝐮𝐥🌸\n" +
-    "╰┈──────┈──────┈─┘";
+    "\n" +
+    centerText(
+      `〈 page ${page}/${totalPages} 〉`,
+      MENU_WIDTH
+    );
 
   return msg;
 }
@@ -259,19 +237,131 @@ function createCommandDetail(
 }
 
 
+async function getHelpGif() {
+  const cacheDir =
+    path.join(
+      __dirname,
+      "cache"
+    );
+
+  if (
+    !fs.existsSync(
+      cacheDir
+    )
+  ) {
+    fs.mkdirSync(
+      cacheDir,
+      {
+        recursive: true
+      }
+    );
+  }
+
+  const indexFile =
+    path.join(
+      cacheDir,
+      "help_gif_index.json"
+    );
+
+  let index = 0;
+
+  if (
+    fs.existsSync(
+      indexFile
+    )
+  ) {
+    try {
+      const savedData =
+        JSON.parse(
+          fs.readFileSync(
+            indexFile,
+            "utf8"
+          )
+        );
+
+      index =
+        (
+          Number(
+            savedData.index || 0
+          ) + 1
+        ) %
+        gifURLs.length;
+
+    } catch {
+      index = 0;
+    }
+  }
+
+  fs.writeFileSync(
+    indexFile,
+    JSON.stringify({
+      index
+    })
+  );
+
+  const gifPath =
+    path.join(
+      cacheDir,
+      `help_gif_${index}.gif`
+    );
+
+  const needsDownload =
+    !fs.existsSync(
+      gifPath
+    ) ||
+    fs.statSync(
+      gifPath
+    ).size === 0;
+
+  if (
+    needsDownload
+  ) {
+    await downloadFile(
+      gifURLs[index],
+      gifPath
+    );
+  }
+
+  return gifPath;
+}
+
+
 module.exports = {
   config: {
     name: "help",
+
     aliases: [
-      "menu"
+      "menu",
+
+      "help1",
+      "help2",
+      "help3",
+      "help4",
+      "help5",
+      "help6",
+      "help7",
+      "help8",
+      "help9",
+      "help10",
+      "help11",
+      "help12",
+      "help13",
+      "help14",
+      "help15"
     ],
-    version: "7.0",
+
+    version: "8.0",
+
     author: "𝐒𝐈𝐅𝐀𝐓",
+
     shortDescription:
       "Show all available commands",
+
     longDescription:
-      "Displays commands in pages with a rotating GIF.",
+      "Displays commands in centered pages with a rotating GIF.",
+
     category: "system",
+
     guide:
       "{pn}help [page number | command name]"
   },
@@ -280,17 +370,47 @@ module.exports = {
   onStart: async function ({
     message,
     args,
-    prefix
+    prefix,
+    commandName
   }) {
     const allCommands =
       global.GoatBot.commands;
 
-    const query =
-      args[0]
-        ? String(args[0]).trim()
+    /*
+      دعم:
+
+      /help
+      /help 2
+      /help2
+      /help15
+    */
+
+    let query =
+      args?.[0]
+        ? String(
+            args[0]
+          ).trim()
         : "";
 
-    let gifPath;
+    const usedCommand =
+      String(
+        commandName || ""
+      ).toLowerCase();
+
+    if (
+      /^help\d+$/.test(
+        usedCommand
+      )
+    ) {
+      query =
+        usedCommand.replace(
+          /^help/,
+          ""
+        );
+    }
+
+
+    let gifPath = null;
 
     try {
       gifPath =
@@ -301,8 +421,6 @@ module.exports = {
         "HELP GIF ERROR:",
         error
       );
-
-      gifPath = null;
     }
 
 
@@ -315,7 +433,9 @@ module.exports = {
 
     if (
       query &&
-      !/^\d+$/.test(query)
+      !/^\d+$/.test(
+        query
+      )
     ) {
       const lowerQuery =
         query.toLowerCase();
@@ -324,20 +444,23 @@ module.exports = {
         allCommands.get(
           lowerQuery
         ) ||
-        [...allCommands.values()]
-          .find(command =>
+        [
+          ...allCommands.values()
+        ].find(
+          command =>
             (
               command.config?.aliases ||
               []
             )
-              .map(alias =>
-                String(alias)
-                  .toLowerCase()
+              .some(
+                alias =>
+                  String(
+                    alias
+                  )
+                    .toLowerCase() ===
+                  lowerQuery
               )
-              .includes(
-                lowerQuery
-              )
-          );
+        );
 
       if (
         !cmd ||
@@ -360,7 +483,9 @@ module.exports = {
 
       if (
         gifPath &&
-        fs.existsSync(gifPath)
+        fs.existsSync(
+          gifPath
+        )
       ) {
         replyData.attachment =
           fs.createReadStream(
@@ -388,14 +513,18 @@ module.exports = {
 
     let page =
       query &&
-      /^\d+$/.test(query)
+      /^\d+$/.test(
+        query
+      )
         ? parseInt(
             query,
             10
           )
         : 1;
 
-    if (page < 1) {
+    if (
+      page < 1
+    ) {
       page = 1;
     }
 
@@ -406,6 +535,7 @@ module.exports = {
       page =
         totalPages;
     }
+
 
     const menuMessage =
       createPageMessage(
@@ -421,7 +551,9 @@ module.exports = {
 
     if (
       gifPath &&
-      fs.existsSync(gifPath)
+      fs.existsSync(
+        gifPath
+      )
     ) {
       replyData.attachment =
         fs.createReadStream(
@@ -454,9 +586,9 @@ function downloadFile(
         https.get(
           url,
           response => {
+
             /*
-              دعم التحويل
-              Redirect
+              دعم روابط التحويل
             */
 
             if (
@@ -475,9 +607,14 @@ function downloadFile(
                 response.headers.location,
                 destination
               )
-                .then(resolve)
-                .catch(reject);
+                .then(
+                  resolve
+                )
+                .catch(
+                  reject
+                );
             }
+
 
             if (
               response.statusCode !== 200
@@ -496,9 +633,11 @@ function downloadFile(
               );
             }
 
+
             response.pipe(
               file
             );
+
 
             file.on(
               "finish",
@@ -510,6 +649,7 @@ function downloadFile(
             );
           }
         );
+
 
       request.on(
         "error",
@@ -526,6 +666,7 @@ function downloadFile(
           );
         }
       );
+
 
       file.on(
         "error",
@@ -544,4 +685,4 @@ function downloadFile(
       );
     }
   );
-}
+          }
