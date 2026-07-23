@@ -64,7 +64,7 @@ module.exports = {
       const gifURLs = [
   "https://i.imgur.com/xhKItwf.gif"
 ];
-    ];
+  
 
     const cacheDir = path.join(__dirname, "cache");
     if (!fs.existsSync(cacheDir)) fs.mkdirSync(cacheDir, { recursive: true });
@@ -73,12 +73,12 @@ module.exports = {
     let index = 0;
     if (fs.existsSync(indexFile)) {
       try {
-        index = (JSON.parse(fs.readFileSync(indexFile)).index + 1) % videoURLs.length;
+        index = (JSON.parse(fs.readFileSync(indexFile)).index + 1) % gifURLs.length;
       } catch {}
     }
     fs.writeFileSync(indexFile, JSON.stringify({ index }));
 
-    const videoPath = path.join(cacheDir, `help_gif_${index}.mp4`);
+    const gifPath = path.join(cacheDir, `help_gif_${index}.gif`);
     if (!fs.existsSync(gifPath)) {
       await downloadFile(gifURLs[index], gifPath);
     }
@@ -138,7 +138,7 @@ module.exports = {
 
     return message.reply({
       body: msg,
-      attachment: fs.createReadStream(gitPath)
+      attachment: fs.createReadStream(gifPath)
     });
   }
 };
