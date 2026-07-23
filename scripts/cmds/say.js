@@ -6,14 +6,14 @@ export default {
     config: {
         name: "say",
         version: "1.0.0",
-        author: "Fares & Gemini",
+        author: "Fares",
         countDown: 5,
         role: 0,
-        shortDescription: "تحويل النص إلى صوت",
-        longDescription: "تحويل النص المدخل إلى بصمة صوتية بشرية مجاناً",
-        category: "media",
+        shortDescription: "تحويل النص إلى صوت بشري",
+        longDescription: "تحويل النص المدخل إلى بصمة صوتية بشرية واضحة ومجانية بالكامل",
+        category: "الخدمات الصوتية",
         guide: {
-            en: "{pn} [text]"
+            ar: "{pn} [النص المراد تحويله]"
         }
     },
 
@@ -22,7 +22,7 @@ export default {
         const text = args.join(" ");
         
         if (!text) {
-            return api.sendMessage("أهلاً بك يا زميلي، الرجاء كتابة النص المراد تحويله.", threadID, messageID);
+            return api.sendMessage("أهلاً بك يا زميلي، الرجاء كتابة النص المراد تحويله بجانب الأمر.", threadID, messageID);
         }
 
         try {
@@ -36,7 +36,7 @@ export default {
             speech.save(filePath, async (err) => {
                 if (err) {
                     console.error(err);
-                    return api.sendMessage("حدث خطأ في توليد الملف الصوتي.", threadID, messageID);
+                    return api.sendMessage("حدث خطأ أثناء توليد الملف الصوتي.", threadID, messageID);
                 }
 
                 await api.sendMessage({
@@ -48,7 +48,7 @@ export default {
                 }, messageID);
             });
 
-        } catch (error) {
+        } chor (error) {
             console.error(error);
             return api.sendMessage("حدث خطأ تقني في السيرفر.", threadID, messageID);
         }
