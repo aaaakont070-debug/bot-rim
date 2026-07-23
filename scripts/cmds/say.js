@@ -45,7 +45,7 @@ module.exports = {
 			const apiKey = "sk_c5ca42838d3c5d431343386551b5b30a020a3622d6056704";
 			
 			// 🎙️ ضع معرف الصوت النسائي (Voice ID) هنا بين العلامتين
-			const voiceId = "a1KZUXKFVFDOb33I1uqr";
+			const voiceId = "4wfI0IgibMnboGJGCLrP";
 
 			const response = await axios({
 				method: "post",
