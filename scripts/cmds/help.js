@@ -68,12 +68,7 @@ const gifURLs = [
   "https://i.giphy.com/media/HOmZcACWYNntC/giphy.gif"
 ];
 
-// عدد الأوامر في كل صفحة
 const COMMANDS_PER_PAGE = 10;
-
-// عدد صفحات الاختصار /help2 إلى /help15
-const MAX_PAGE_ALIAS = 15;
-
 
 function getAllCommands() {
   const commands = [];
@@ -101,20 +96,22 @@ function getAllCommands() {
   );
 }
 
+/*
+  Messenger لا يملك خاصية توسيط حقيقية.
+  لذلك نستعمل مسافات ثابتة.
 
-function centerText(text, width) {
-  text = String(text);
+  إذا أردت تحريك كل القائمة:
+  زد أو أنقص الرقم هنا.
+*/
+const CENTER_SPACES = "        ";
 
-  const spaces = Math.max(
-    0,
-    Math.floor(
-      (width - text.length) / 2
-    )
-  );
-
-  return " ".repeat(spaces) + text;
+/*
+  هذه الدالة تجعل العنوان ورقم الصفحة
+  في وسط القائمة بشكل ثابت.
+*/
+function centerMenuText(text) {
+  return CENTER_SPACES + String(text || "");
 }
-
 
 function createPageMessage(
   commands,
@@ -131,47 +128,37 @@ function createPageMessage(
       start + COMMANDS_PER_PAGE
     );
 
-  /*
-    العرض التقريبي في وسط رسالة Messenger.
-    Messenger لا يدعم محاذاة حقيقية،
-    لذلك نستخدم مسافات ثابتة.
-  */
-  const MENU_WIDTH = 30;
-
   let msg = "";
 
-  // العنوان في الوسط
+  /*
+    عنوان القائمة في الوسط.
+  */
   msg +=
-    centerText(
-      "commands list",
-      MENU_WIDTH
-    ) +
+    centerMenuText("commands list") +
     "\n\n";
 
-  // الأوامر في الوسط
+  /*
+    الأوامر في الوسط.
+  */
   for (const command of pageCommands) {
-    const commandText =
-      `${prefix}${command.name}`;
-
     msg +=
-      centerText(
-        commandText,
-        MENU_WIDTH
+      centerMenuText(
+        `${prefix}${command.name}`
       ) +
       "\n";
   }
 
-  // رقم الصفحة في الوسط
+  /*
+    رقم الصفحة في الوسط.
+  */
   msg +=
     "\n" +
-    centerText(
-      `〈 page ${page}/${totalPages} 〉`,
-      MENU_WIDTH
+    centerMenuText(
+      `〈 page ${page}/${totalPages} 〉`
     );
 
   return msg;
 }
-
 
 function createCommandDetail(
   cmd,
@@ -196,7 +183,7 @@ function createCommandDetail(
     "No description";
 
   const usage =
-    (
+    String(
       guide?.en ||
       guide ||
       `{pn}${name}`
@@ -236,7 +223,6 @@ function createCommandDetail(
   );
 }
 
-
 async function getHelpGif() {
   const cacheDir =
     path.join(
@@ -244,11 +230,7 @@ async function getHelpGif() {
       "cache"
     );
 
-  if (
-    !fs.existsSync(
-      cacheDir
-    )
-  ) {
+  if (!fs.existsSync(cacheDir)) {
     fs.mkdirSync(
       cacheDir,
       {
@@ -265,11 +247,7 @@ async function getHelpGif() {
 
   let index = 0;
 
-  if (
-    fs.existsSync(
-      indexFile
-    )
-  ) {
+  if (fs.existsSync(indexFile)) {
     try {
       const savedData =
         JSON.parse(
@@ -306,16 +284,10 @@ async function getHelpGif() {
     );
 
   const needsDownload =
-    !fs.existsSync(
-      gifPath
-    ) ||
-    fs.statSync(
-      gifPath
-    ).size === 0;
+    !fs.existsSync(gifPath) ||
+    fs.statSync(gifPath).size === 0;
 
-  if (
-    needsDownload
-  ) {
+  if (needsDownload) {
     await downloadFile(
       gifURLs[index],
       gifPath
@@ -325,14 +297,12 @@ async function getHelpGif() {
   return gifPath;
 }
 
-
 module.exports = {
   config: {
     name: "help",
 
     aliases: [
       "menu",
-
       "help1",
       "help2",
       "help3",
@@ -350,7 +320,7 @@ module.exports = {
       "help15"
     ],
 
-    version: "8.0",
+    version: "8.1",
 
     author: "𝐒𝐈𝐅𝐀𝐓",
 
@@ -366,7 +336,6 @@ module.exports = {
       "{pn}help [page number | command name]"
   },
 
-
   onStart: async function ({
     message,
     args,
@@ -375,15 +344,6 @@ module.exports = {
   }) {
     const allCommands =
       global.GoatBot.commands;
-
-    /*
-      دعم:
-
-      /help
-      /help 2
-      /help2
-      /help15
-    */
 
     let query =
       args?.[0]
@@ -397,6 +357,14 @@ module.exports = {
         commandName || ""
       ).toLowerCase();
 
+    /*
+      يدعم:
+
+      /help
+      /help 2
+      /help2
+      /help15
+    */
     if (
       /^help\d+$/.test(
         usedCommand
@@ -408,7 +376,6 @@ module.exports = {
           ""
         );
     }
-
 
     let gifPath = null;
 
@@ -423,19 +390,15 @@ module.exports = {
       );
     }
 
-
     /*
-      عرض تفاصيل أمر:
+      تفاصيل أمر:
 
       /help ai
       /help music
     */
-
     if (
       query &&
-      !/^\d+$/.test(
-        query
-      )
+      !/^\d+$/.test(query)
     ) {
       const lowerQuery =
         query.toLowerCase();
@@ -451,15 +414,12 @@ module.exports = {
             (
               command.config?.aliases ||
               []
+            ).some(
+              alias =>
+                String(alias)
+                  .toLowerCase() ===
+                lowerQuery
             )
-              .some(
-                alias =>
-                  String(
-                    alias
-                  )
-                    .toLowerCase() ===
-                  lowerQuery
-              )
         );
 
       if (
@@ -498,7 +458,6 @@ module.exports = {
       );
     }
 
-
     const commands =
       getAllCommands();
 
@@ -513,18 +472,14 @@ module.exports = {
 
     let page =
       query &&
-      /^\d+$/.test(
-        query
-      )
+      /^\d+$/.test(query)
         ? parseInt(
             query,
             10
           )
         : 1;
 
-    if (
-      page < 1
-    ) {
+    if (page < 1) {
       page = 1;
     }
 
@@ -535,7 +490,6 @@ module.exports = {
       page =
         totalPages;
     }
-
 
     const menuMessage =
       createPageMessage(
@@ -567,7 +521,6 @@ module.exports = {
   }
 };
 
-
 function downloadFile(
   url,
   destination
@@ -588,9 +541,8 @@ function downloadFile(
           response => {
 
             /*
-              دعم روابط التحويل
+              دعم روابط التحويل.
             */
-
             if (
               response.statusCode >= 300 &&
               response.statusCode < 400 &&
@@ -607,14 +559,9 @@ function downloadFile(
                 response.headers.location,
                 destination
               )
-                .then(
-                  resolve
-                )
-                .catch(
-                  reject
-                );
+                .then(resolve)
+                .catch(reject);
             }
-
 
             if (
               response.statusCode !== 200
@@ -633,11 +580,9 @@ function downloadFile(
               );
             }
 
-
             response.pipe(
               file
             );
-
 
             file.on(
               "finish",
@@ -649,7 +594,6 @@ function downloadFile(
             );
           }
         );
-
 
       request.on(
         "error",
@@ -666,7 +610,6 @@ function downloadFile(
           );
         }
       );
-
 
       file.on(
         "error",
@@ -685,4 +628,4 @@ function downloadFile(
       );
     }
   );
-          }
+}
