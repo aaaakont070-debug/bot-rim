@@ -3,43 +3,34 @@ const path = require("path");
 const https = require("https");
 
 const boldMap = {
-  a:'𝗮', b:'𝗯', c:'𝗰', d:'𝗱', e:'𝗲',
-  f:'𝗳', g:'𝗴', h:'𝗵', i:'𝗶', j:'𝗷',
-  k:'𝗸', l:'𝗹', m:'𝗺', n:'𝗻', o:'𝗼',
-  p:'𝗽', q:'𝗾', r:'𝗿', s:'𝘀', t:'𝘁',
-  u:'𝘂', v:'𝘃', w:'𝘄', x:'𝘅', y:'𝘆',
-  z:'𝘇'
+  a: '𝗮', b: '𝗯', c: '𝗰', d: '𝗱', e: '𝗲',
+  f: '𝗳', g: '𝗴', h: '𝗵', i: '𝗶', j: '𝗷',
+  k: '𝗸', l: '𝗹', m: '𝗺', n: '𝗻', o: '𝗼',
+  p: '𝗽', q: '𝗾', r: '𝗿', s: '𝘀', t: '𝘁',
+  u: '𝘂', v: '𝘃', w: '𝘄', x: '𝘅', y: '𝘆',
+  z: '𝘇'
 };
 
 const cmdFontMap = {
   ...boldMap,
-  '0':'𝟬',
-  '1':'𝟭',
-  '2':'𝟮',
-  '3':'𝟯',
-  '4':'𝟰',
-  '5':'𝟱',
-  '6':'𝟲',
-  '7':'𝟳',
-  '8':'𝟴',
-  '9':'𝟵'
+  '0': '𝟬',
+  '1': '𝟭',
+  '2': '𝟮',
+  '3': '𝟯',
+  '4': '𝟰',
+  '5': '𝟱',
+  '6': '𝟲',
+  '7': '𝟳',
+  '8': '𝟴',
+  '9': '𝟵'
 };
 
 const toFont = text =>
-  text.toLowerCase().split("").map(c => cmdFontMap[c] || c).join("");
-};
-
-const cmdFontMap = {
-  ...smallCapsMap,
-  '0':'⁰','1':'¹','2':'²','3':'³','4':'⁴',
-  '5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'
-};
-
-const toSmallCaps = t =>
-  t.toLowerCase().split("").map(c => smallCapsMap[c] || c).join("");
-
-const toCmdFont = t =>
-  t.toLowerCase().split("").map(c => cmdFontMap[c] || c).join("");
+  text
+    .toLowerCase()
+    .split("")
+    .map(c => cmdFontMap[c] || c)
+    .join("");
 
 module.exports = {
   config: {
@@ -176,10 +167,10 @@ module.exports = {
     const sortedCategories = Object.keys(categoriesList).sort();
 
     for (const cat of sortedCategories) {
-      msg += `╭┈─┈━[🌸 ${toSmallCaps(cat)} ]\n`;
+      msg += `╭┈─┈━[🌸 ${tofont(cat)} ]\n`;
       const commands = categoriesList[cat].sort();
       for (let i = 0; i < commands.length; i += 2) {
-        const a = toCmdFont(commands[i]);
+        const a = tofont(commands[i]);
         const b = commands[i + 1] ? toCmdFont(commands[i + 1]) : null;
         msg += b ? `┋⌬ ${a.padEnd(12)} ⌬ ${b}\n` : `┋⌬ ${a}\n`;
       }
