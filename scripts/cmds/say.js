@@ -42,7 +42,7 @@ module.exports = {
 			const tmpPath = path.join(tmpDir, `ai_girl_voice_${Date.now()}.mp3`);
 
 			// 🔑 ضع مفتاح الـ API الخاص بك هنا بين العلامتين
-			const apiKey = "sk_bc652b075a4a7adeae2d11536b4633026aa0c8e5acfd3d18";
+			const apiKey = "sk_72c3c6017d02413a07282e4cb45d22c62c404c261fb77c04";
 			
 			// 🎙️ ضع معرف الصوت النسائي (Voice ID) هنا بين العلامتين
 			const voiceId = "4wfI0IgibMnboGJGCLrP";
