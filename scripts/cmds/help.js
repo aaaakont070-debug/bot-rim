@@ -62,7 +62,44 @@ module.exports = {
     const categoriesList = global.GoatBot.cacheHelp;
 
       const gifURLs = [
-  "https://i.imgur.com/xhKItwf.gif"
+  "https://i.giphy.com/media/ZOGCyj0NW28gg/giphy.gif",
+  "https://i.giphy.com/media/98dujYZyq4mOc/giphy.gif",
+ "https://i.giphy.com/media/FeVg8ViEczcxG/giphy.gif",
+"https://i.giphy.com/media/8Lc5xmvzRhlLy/giphy.gif",
+"https://i.giphy.com/media/XBuPC4YTAFSta/giphy.gif",
+  "https://i.giphy.com/media/1dcLFNKRUKvte/giphy.gif",
+"https://i.giphy.com/media/1dcLFNKRUKvte/giphy.gif",
+   "https://i.giphy.com/media/A5KGHdmmxHdwk/giphy.gif",
+    "https://i.giphy.com/media/TbWQoPQOxwBpe/giphy.gif",
+  "https://i.imgur.com/xhKItwf.gif",
+  "https://media.giphy.com/media/4xKJUTzWPAVoY/giphy.gif",
+   "https://media.giphy.com/media/59d1zo8SUSaUU/giphy.gif",
+   "https://media.giphy.com/media/59d1zo8SUSaUU/giphy.gif",
+    "https://i.giphy.com/media/4xKJUTzWPAVoY/giphy.gif",
+    "https://i.giphy.com/media/4TmxH7ZMn1aYE/giphy.gif",
+    "https://i.giphy.com/media/bqSkJ4IwNcoZG/giphy.gif",
+    "https://i.giphy.com/media/BS5xpdVyMKniU/giphy.gif",
+    "https://i.giphy.com/media/BS5xpdVyMKniU/giphy.gif",
+    "https://i.giphy.com/media/TlDd1mxmPGQo/giphy.gif",
+    "https://giphy.com/gifs/ai-yazawa-XoL1nFXFuEmZy",
+    "https://i.giphy.com/media/EVju4o7HRs8QquQmYV/giphy.gif",
+    "https://i.giphy.com/media/ZE57NgGdXs3pf6uDio/giphy.gif",
+    "https://i.giphy.com/media/84VixDW3c3AZ19jcm7/giphy.gif",
+    "https://media.giphy.com/media/L0gMC6eeMoDJL0RdRL/giphy.gif",
+    "https://i.giphy.com/media/WJKA6tktuSYAKMhz8H/giphy.gif",
+    "https://i.giphy.com/media/Sxw1JkqEBZjWvMNZ4X/giphy.gif",
+    "https://i.giphy.com/media/2fjJDMP3Q3ZVK0KehW/giphy.gif",
+    "https://i.giphy.com/media/1oEUK0kZI4wTGJMeO3/giphy.gif",
+    "https://giphy.com/gifs/fighting-ninja-scroll-HL1qdO4LYRimI",
+    "https://giphy.com/gifs/yuri-girls-kissing-EVODaJHSXZGta",
+    "https://i.giphy.com/media/2fjJDMP3Q3ZVK0KehW/giphy.gif",
+    "https://i.giphy.com/media/ODECD7W3dzk5y/giphy.gif",
+    "https://i.giphy.com/media/1ylfuYzjErdKkJsGPi/giphy.gif",
+    "https://i.giphy.com/media/ODECD7W3dzk5y/giphy.gif",
+    "https://i.giphy.com/media/FSWQDkuL088TK/giphy.gif",
+    "https://i.giphy.com/media/HOmZcACWYNntC/giphy.gif",
+    "https://i.giphy.com/media/HOmZcACWYNntC/giphy.gif",
+    
 ];
   
 
