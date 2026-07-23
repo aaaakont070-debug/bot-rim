@@ -39,7 +39,8 @@ module.exports = {
 			const waitingMsg = await message.reply("🎙️ جاري هندسة الصوت الاحترافي...");
 
 			// 🔑 ضع مفتاح OpenAI API الخاص بك هنا (يبدأ بـ sk-)
-			const openaiApiKey = "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";
+			const openaiApiKey = process.env.OPENAI_API_KEY;
+
 
 			const response = await axios.post(
 				"https://api.openai.com/v1/audio/speech",
