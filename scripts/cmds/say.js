@@ -6,20 +6,19 @@ module.exports = {
 	config: {
 		name: "say",
 		aliases: ["tts", "speak", "قول", "صوت"],
-		version: "5.0.0",
+		version: "6.0.0",
 		author: "Fares",
 		countDown: 3,
 		role: 0,
-		description: { ar: "توليد صوت نسائي بشري حقيقي وواقعي 100%" },
+		description: { ar: "توليد صوت بشري حقيقي وواقعي 100%" },
 		category: "utility",
-		guide: { ar: "{pn} <النص> — إرسال بصمة صوتية بصوت بنت حقيقي" }
+		guide: { ar: "{pn} <النص> — إرسال بصمة صوتية" }
 	},
 
 	onStart: async function ({ args, message, event }) {
 		let text = "";
 
 		try {
-			// دعم الرد على الرسائل أو كتابة النص مباشرة
 			if (event.type === "message_reply") {
 				text = event.messageReply?.body || "";
 			} else {
@@ -34,63 +33,57 @@ module.exports = {
 			}
 
 			if (text.length > 250) {
-				text = text.slice(0, 250); // حماية الذاكرة والحد الأقصى للطلبات
+				text = text.slice(0, 250);
 			}
 
-			const tmpDir = path.join(__dirname, "tmp");
-			await fs.ensureDir(tmpDir);
-			const tmpPath = path.join(tmpDir, `ai_girl_voice_${Date.now()}.mp3`);
+			const waitingMsg = await message.reply("⏳ جاري توليد الصوت الذكي...");
 
-			// 🔑 ضع مفتاح الـ API الخاص بك هنا بين العلامتين
 			const apiKey = "sk_c5ca42838d3c5d431343386551b5b30a020a3622d6056704";
-			
-			// 🎙️ ضع معرف الصوت النسائي (Voice ID) هنا بين العلامتين
-			const voiceId = "4wfI0IgibMnboGJGCLrP";
+			const voiceId = "21m00Tcm4TlvDq8ikWAM"; // أو المعرّف الذي اخترته
 
-			const response = await axios({
-				method: "post",
-				url: `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
-				headers: {
-					"Accept": "audio/mpeg",
-					"Content-Type": "application/json",
-					"xi-api-key": apiKey
-				},
-				data: {
+			const response = await axios.post(
+				`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
+				{
 					text: text,
-					model_id: "eleven_multilingual_v2", // نموذج ممتاز يدعم اللغة العربية واللهجات بدقة
+					model_id: "eleven_multilingual_v2",
 					voice_settings: {
 						stability: 0.5,
 						similarity_boost: 0.75
 					}
 				},
-				responseType: "stream",
-				timeout: 25000
-			});
+				{
+					headers: {
+						"Accept": "audio/mpeg",
+						"Content-Type": "application/json",
+						"xi-api-key": apiKey
+					},
+					responseType: "arraybuffer",
+					timeout: 30000
+				}
+			);
 
-			const writer = fs.createWriteStream(tmpPath);
-			response.data.pipe(writer);
+			const tmpDir = path.join(__dirname, "tmp");
+			await fs.ensureDir(tmpDir);
+			const tmpPath = path.join(tmpDir, `voice_${Date.now()}.mp3`);
 
-			await new Promise((resolve, reject) => {
-				writer.on("finish", resolve);
-				writer.on("error", reject);
-			});
+			await fs.writeFile(tmpPath, response.data);
 
 			if (await fs.pathExists(tmpPath)) {
 				await message.reply({
 					attachment: fs.createReadStream(tmpPath)
 				});
 
-				// حذف الملف المؤقت بعد الإرسال للحفاظ على مساحة السيرفر
+				// حذف رسالة الانتظار إن أمكن أو تركها
 				setTimeout(() => {
 					fs.remove(tmpPath).catch(() => {});
-				}, 20000);
+				}, 15000);
 			} else {
-				return message.reply("⌀ تعذر إنشاء الملف الصوتي الذكي.");
+				return message.reply("⌀ تعذر حفظ الملف الصوتي.");
 			}
 
 		} catch (error) {
-			console.error("AI Voice Error:", error);
-			return message.reply("⌀ حدث خطأ في الاتصال بخدمة الصوت، تأكد من صحة المفتاح ومعرف الصوت.");
+			console.error("ElevenLabs Error:", error.response?.data ? Buffer.from(error.response.data).toString() : error.message);
+			return message.reply("⌀ حدث خطأ أثناء الاتصال بخدمة الصوت، تأكد من صحة المفتاح.");
 		}
 	}
 };
