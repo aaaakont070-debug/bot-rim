@@ -7,10 +7,10 @@ module.exports = {
 		name: "say",
 		aliases: ["tts", "speak", "قول", "صوت"],
 		version: "5.0.0",
-		author: "SIFAT",
-		countDown: 5,
+		author: "Fares",
+		countDown: 3,
 		role: 0,
-		description: { ar: "توليد صوت نسائي بشري حقيقي وواقعي 100% باستخدام الذكاء الاصطناعي" },
+		description: { ar: "توليد صوت نسائي بشري حقيقي وواقعي 100%" },
 		category: "utility",
 		guide: { ar: "{pn} <النص> — إرسال بصمة صوتية بصوت بنت حقيقي" }
 	},
@@ -19,6 +19,7 @@ module.exports = {
 		let text = "";
 
 		try {
+			// دعم الرد على الرسائل أو كتابة النص مباشرة
 			if (event.type === "message_reply") {
 				text = event.messageReply?.body || "";
 			} else {
@@ -33,27 +34,18 @@ module.exports = {
 			}
 
 			if (text.length > 250) {
-				text = text.slice(0, 250); // الحفاظ على الحد الآمن لعدم تجاوز استهلاك الخادم
+				text = text.slice(0, 250); // حماية الذاكرة والحد الأقصى للطلبات
 			}
-
-			// رسالة تنبيه بأن المعالجة الذكية جارية
-			const waitingMsg = await message.reply("⏳ جاري توليد الصوت البشري الطبيعي...");
 
 			const tmpDir = path.join(__dirname, "tmp");
 			await fs.ensureDir(tmpDir);
 			const tmpPath = path.join(tmpDir, `ai_girl_voice_${Date.now()}.mp3`);
 
-			// هنا يتم وضع معرف الصوت البشري النسائي (Voice ID) ومفتاح الخدمة الخاص بك
-			// ملاحظة: يمكنك وضع مفتاحك هنا أو استدعاؤه من ملف الإعدادات config.json لأمان أعلى
-			const apiKey = global.GoatBot?.config?.aiVoiceApiKey || "ضع_مفتاح_الـ_API_هنا";
-			const voiceId = "21m00Tcm4TlvDq8ikWAM"; // مثال لشصخية صوت نسائي شهير في المنصة
-
-			if (apiKey === "ضع_مفتاح_الـ_API_هنا") {
-				if (waitingMsg && waitingMsg.messageID) {
-					try { api.unsendMessage(waitingMsg.messageID); } catch (_) {}
-				}
-				return message.reply("⚠️ تنبيه: يرجى إعداد مفتاح خدمة الصوت (API Key) في ملف الإعدادات لتفعيل الصوت البشري الحقيقي.");
-			}
+			// 🔑 ضع مفتاح الـ API الخاص بك هنا بين العلامتين
+			const apiKey = "sk_bc652b075a4a7adeae2d11536b4633026aa0c8e5acfd3d18";
+			
+			// 🎙️ ضع معرف الصوت النسائي (Voice ID) هنا بين العلامتين
+			const voiceId = "21m00Tcm4TlvDq8ikWAM";
 
 			const response = await axios({
 				method: "post",
@@ -65,14 +57,14 @@ module.exports = {
 				},
 				data: {
 					text: text,
-					model_id: "eleven_multilingual_v2", // نموذج يدعم اللغة العربية بدقة عالية
+					model_id: "eleven_multilingual_v2", // نموذج ممتاز يدعم اللغة العربية واللهجات بدقة
 					voice_settings: {
 						stability: 0.5,
 						similarity_boost: 0.75
 					}
 				},
 				responseType: "stream",
-				timeout: 20000
+				timeout: 25000
 			});
 
 			const writer = fs.createWriteStream(tmpPath);
@@ -83,16 +75,12 @@ module.exports = {
 				writer.on("error", reject);
 			});
 
-			// حذف رسالة الانتظار إن وجدت
-			if (waitingMsg && waitingMsg.messageID) {
-				try { api.unsendMessage(waitingMsg.messageID); } catch (_) {}
-			}
-
 			if (await fs.pathExists(tmpPath)) {
 				await message.reply({
 					attachment: fs.createReadStream(tmpPath)
 				});
 
+				// حذف الملف المؤقت بعد الإرسال للحفاظ على مساحة السيرفر
 				setTimeout(() => {
 					fs.remove(tmpPath).catch(() => {});
 				}, 20000);
@@ -102,7 +90,7 @@ module.exports = {
 
 		} catch (error) {
 			console.error("AI Voice Error:", error);
-			return message.reply("⌀ حدث خطأ في الاتصال بخدمة الصوت الذكي، البوت يعمل بأمان ولن يتأثر.");
+			return message.reply("⌀ حدث خطأ في الاتصال بخدمة الصوت، تأكد من صحة المفتاح ومعرف الصوت.");
 		}
 	}
 };
