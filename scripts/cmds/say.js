@@ -1,86 +1,56 @@
-const axios = require("axios");
-const fs = require("fs-extra");
-const path = require("path");
+const gtts = require('gtts');
+const fs = require('fs-extra');
+const path = require('path');
 
-module.exports = {
-	config: {
-		name: "say",
-		aliases: ["tts", "speak", "قول", "صوت"],
-		version: "9.0.0",
-		author: "Fares",
-		countDown: 3,
-		role: 0,
-		description: { ar: "توليد صوت بشري واقعي واحترافي بناءً على طلب المستخدم" },
-		category: "utility",
-		guide: { ar: "{pn} <النص> — تحويل أي نص إلى صوت بشري حقيقي" }
-	},
+export default {
+    config: {
+        name: "say",
+        version: "1.0.0",
+        author: "Fares & Gemini",
+        countDown: 5,
+        role: 0,
+        shortDescription: "تحويل النص إلى صوت",
+        longDescription: "تحويل النص المدخل إلى بصمة صوتية بشرية مجاناً",
+        category: "media",
+        guide: {
+            en: "{pn} [text]"
+        }
+    },
 
-	onStart: async function ({ args, message, event }) {
-		let text = "";
+    onStart: async function ({ api, event, args }) {
+        const { threadID, messageID } = event;
+        const text = args.join(" ");
+        
+        if (!text) {
+            return api.sendMessage("أهلاً بك يا زميلي، الرجاء كتابة النص المراد تحويله.", threadID, messageID);
+        }
 
-		try {
-			if (event.type === "message_reply") {
-				text = event.messageReply?.body || "";
-			} else {
-				if (!args || !args.length) {
-					return message.reply("⌀ أهلاً بك يا فارس، الرجاء كتابة النص المراد تحويله.");
-				}
-				text = args.join(" ");
-			}
+        try {
+            await api.sendMessage("🎙️ جاري هندسة الصوت الاحترافي...", threadID, messageID);
 
-			if (!text || !text.trim()) {
-				return message.reply("⌀ النص فارغ.");
-			}
+            const fileName = `voice_${Date.now()}.mp3`;
+            const filePath = path.join(__dirname, fileName);
 
-			if (text.length > 300) {
-				text = text.slice(0, 300);
-			}
+            const speech = new gtts(text, 'ar');
 
-			const waitingMsg = await message.reply("🎙️ جاري هندسة الصوت الاحترافي...");
+            speech.save(filePath, async (err) => {
+                if (err) {
+                    console.error(err);
+                    return api.sendMessage("حدث خطأ في توليد الملف الصوتي.", threadID, messageID);
+                }
 
-			// 🔑 ضع مفتاح OpenAI API الخاص بك هنا (يبدأ بـ sk-)
-			const openaiApiKey = process.env.OPENAI_API_KEY;
+                await api.sendMessage({
+                    attachment: fs.createReadStream(filePath)
+                }, threadID, () => {
+                    if (fs.existsSync(filePath)) {
+                        fs.unlinkSync(filePath);
+                    }
+                }, messageID);
+            });
 
-
-			const response = await axios.post(
-				"https://api.openai.com/v1/audio/speech",
-				{
-					model: "tts-1", // نموذج عالي السرعة والجودة
-					input: text,
-					voice: "nova", // صوت نسائي بشري ناعم وواقعي جداً (أو اختر alloy / shimmer)
-					response_format: "mp3"
-				},
-				{
-					headers: {
-						"Authorization": `Bearer ${openaiApiKey}`,
-						"Content-Type": "application/json"
-					},
-					responseType: "arraybuffer",
-					timeout: 30000
-				}
-			);
-
-			const tmpDir = path.join(__dirname, "tmp");
-			await fs.ensureDir(tmpDir);
-			const tmpPath = path.join(tmpDir, `openai_voice_${Date.now()}.mp3`);
-
-			await fs.writeFile(tmpPath, response.data);
-
-			if (await fs.pathExists(tmpPath)) {
-				await message.reply({
-					attachment: fs.createReadStream(tmpPath)
-				});
-
-				setTimeout(() => {
-					fs.remove(tmpPath).catch(() => {});
-				}, 15000);
-			} else {
-				return message.reply("⌀ تعذر حفظ الملف الصوتي.");
-			}
-
-		} catch (error) {
-			console.error("OpenAI TTS Error:", error.response?.data ? Buffer.from(error.response.data).toString() : error.message);
-			return message.reply("⌀ حدث خطأ في الـ API الاحترافي، تأكد من المفتاح.");
-		}
-	}
+        } catch (error) {
+            console.error(error);
+            return api.sendMessage("حدث خطأ تقني في السيرفر.", threadID, messageID);
+        }
+    }
 };
