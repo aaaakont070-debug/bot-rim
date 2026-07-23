@@ -13,8 +13,8 @@
   "language": "en",
   "notesLanguage": "change to your language with ISO 639-1 code, available languages: vi (Vietnamese), en (English)",
   "nickNameBot": "MĀRĪN MGĪ 👿",
-  "prefix": ".",
-  "adminPrefix": "?",
+  "prefix": "/",
+  "adminPrefix": "/",
   "devPrefix": "/",
   "adminPrefix_note": " ",
   "noPrefix": "adminOnly",
@@ -25,7 +25,7 @@
     "whitelistUsers": []
   },
   "adminBot": [
-    "61591691632709",
+    "61590146324460",
     "61590391333546",
     "100065590940242"
   ],
