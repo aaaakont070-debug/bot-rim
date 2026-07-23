@@ -61,19 +61,15 @@ module.exports = {
     }
     const categoriesList = global.GoatBot.cacheHelp;
 
-    const videoURLs = [
-      "https://i.imgur.com/IudwgaP.mp4",
-      "https://i.imgur.com/AMv8IqG.mp4",
-      "https://i.imgur.com/xhFp4Rc.mp4",
-      "https://i.imgur.com/EXar1VY.mp4",
-      "https://i.imgur.com/vWigmIF.mp4",
-      "https://i.imgur.com/V6Au0p4.mp4"
+      const gifURLs = [
+  "https://i.imgur.com/xhKItwf.gif"
+];
     ];
 
     const cacheDir = path.join(__dirname, "cache");
     if (!fs.existsSync(cacheDir)) fs.mkdirSync(cacheDir, { recursive: true });
 
-    const indexFile = path.join(cacheDir, "help_video_index.json");
+    const indexFile = path.join(cacheDir, "help_gif_index.json");
     let index = 0;
     if (fs.existsSync(indexFile)) {
       try {
@@ -82,9 +78,9 @@ module.exports = {
     }
     fs.writeFileSync(indexFile, JSON.stringify({ index }));
 
-    const videoPath = path.join(cacheDir, `help_video_${index}.mp4`);
-    if (!fs.existsSync(videoPath)) {
-      await downloadFile(videoURLs[index], videoPath);
+    const videoPath = path.join(cacheDir, `help_gif_${index}.mp4`);
+    if (!fs.existsSync(gifPath)) {
+      await downloadFile(gifURLs[index], gifPath);
     }
 
     if (args[0]) {
@@ -113,7 +109,7 @@ module.exports = {
         ` 🌸𝐒𝐭𝐚𝐲 𝐇𝐚𝐩𝐩𝐲&𝐁𝐞𝐚𝐮𝐭𝐢𝐟𝐮𝐥🌸\n` +
         `╰┈───┈──────┈───┈╯`;
 
-      return message.reply({ body: detailMsg, attachment: fs.createReadStream(videoPath) });
+      return message.reply({ body: detailMsg, attachment: fs.createReadStream(gifPath) });
     }
 
 
@@ -142,7 +138,7 @@ module.exports = {
 
     return message.reply({
       body: msg,
-      attachment: fs.createReadStream(videoPath)
+      attachment: fs.createReadStream(gitPath)
     });
   }
 };
