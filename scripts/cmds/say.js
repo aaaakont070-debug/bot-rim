@@ -24,7 +24,6 @@ export default {
         try {
             await api.sendMessage("🎙️ جاري توليد الصوت...", threadID, messageID);
 
-            // استخدام رابط جوجل TTS المباشر بدون حزم خارجية
             const encodedText = encodeURIComponent(text);
             const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=ar&client=tw-ob`;
 
