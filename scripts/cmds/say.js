@@ -2,34 +2,23 @@ const https = require("https");
 const fs = require("fs");
 const path = require("path");
 
-const LANGS = {
-  ar: "ar",
-  عربي: "ar",
-  arabic: "ar",
-  en: "en",
-  english: "en",
-  fr: "fr",
-  french: "fr"
-};
-
-
 module.exports = {
   config: {
     name: "say",
     aliases: ["tts", "صوت", "نطق"],
-    version: "5.0.0",
+    version: "6.0.0",
     author: "Fares",
     countDown: 5,
     role: 0,
 
     description: {
-      ar: "تحويل النص إلى صوت روبوت Google مجاني"
+      ar: "تحويل النص إلى صوت"
     },
 
     category: "utility",
 
     guide: {
-      ar: "{pn} النص | اللغة"
+      ar: "{pn} النص"
     }
   },
 
@@ -40,84 +29,57 @@ module.exports = {
       return message.reply("⚠️ اكتب النص");
 
 
-    let data = args.join(" ").split("|");
+    let text = args.join(" ");
 
-    let text = data[0].trim();
-
-    let lang = "ar";
-
-    if (data[1]) {
-      lang =
-      LANGS[data[1].trim().toLowerCase()] || "ar";
-    }
+    if (text.length > 300)
+      text = text.slice(0,300);
 
 
-    const file =
-    path.join(__dirname, `say_${Date.now()}.mp3`);
+    let file =
+    path.join(__dirname, `voice_${Date.now()}.mp3`);
 
 
-    function download(url){
+    try {
 
-      return new Promise((resolve,reject)=>{
+      let url =
+      "https://translate.google.com/translate_tts" +
+      "?ie=UTF-8" +
+      "&client=tw-ob" +
+      "&tl=ar" +
+      "&q=" +
+      encodeURIComponent(text);
+
+
+      let audio = await new Promise((resolve,reject)=>{
 
         https.get(url,{
           headers:{
-            "User-Agent":"Mozilla/5.0"
+            "User-Agent":
+            "Mozilla/5.0"
           }
         },res=>{
 
-          let chunks=[];
+          let data=[];
 
-          res.on("data",d=>chunks.push(d));
+          res.on("data",chunk=>{
+            data.push(chunk);
+          });
 
           res.on("end",()=>{
-
-            resolve(Buffer.concat(chunks));
-
+            resolve(Buffer.concat(data));
           });
 
         }).on("error",reject);
 
       });
 
-    }
 
-
-    try {
-
-      let parts =
-      text.match(/.{1,150}/g);
-
-
-      let audio=[];
-
-
-      for(let part of parts){
-
-        let url =
-        "https://translate.google.com/translate_tts"+
-        `?ie=UTF-8&q=${encodeURIComponent(part)}&tl=${lang}&client=tw-ob`;
-
-
-        let data =
-        await download(url);
-
-
-        audio.push(data);
-      }
-
-
-      fs.writeFileSync(
-        file,
-        Buffer.concat(audio)
-      );
+      fs.writeFileSync(file,audio);
 
 
       await message.reply({
-        body:
-        `🤖 تم إنشاء الصوت\n🌐 ${lang}`,
-        attachment:
-        fs.createReadStream(file)
+        body:"🤖 تم إنشاء الصوت",
+        attachment:fs.createReadStream(file)
       });
 
 
@@ -126,12 +88,12 @@ module.exports = {
       },60000);
 
 
-    } catch(e){
+    } catch(err){
 
-      console.log(e);
+      console.log(err);
 
       message.reply(
-        "❌ تعذر إنشاء الصوت"
+        "❌ خطأ في إنشاء الصوت"
       );
 
     }
