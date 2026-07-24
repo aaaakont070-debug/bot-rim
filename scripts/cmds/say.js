@@ -1,84 +1,140 @@
-const axios = require("axios");
-const fs = require("fs-extra");
+const https = require("https");
+const fs = require("fs");
+const path = require("path");
 
-const LANG_ALIASES = {
-	en: "en", english: "en",
-	bn: "bn", bengali: "bn", bangla: "bn",
-	hi: "hi", hindi: "hi",
-	ar: "ar", arabic: "ar",
-	fr: "fr", french: "fr",
-	de: "de", german: "de",
-	es: "es", spanish: "es",
-	ja: "ja", japanese: "ja",
-	ko: "ko", korean: "ko",
-	zh: "zh", chinese: "zh",
-	ru: "ru", russian: "ru",
-	pt: "pt", portuguese: "pt",
-	tr: "tr", turkish: "tr",
-	vi: "vi", vietnamese: "vi",
-	id: "id", indonesian: "id",
+const LANGS = {
+  ar: "ar",
+  عربي: "ar",
+  arabic: "ar",
+  en: "en",
+  english: "en",
+  fr: "fr",
+  french: "fr"
 };
 
+
 module.exports = {
-	config: {
-		name: "say",
-		aliases: ["tts", "نطق", "صوت"],
-		version: "2.1.0",
-		author: "Fares & SIFAT",
-		countDown: 5,
-		role: 0,
-		description: { ar: "تحويل النص إلى بصمة صوتية بشرية" },
-		category: "utility",
-		guide: { ar: "{pn} <النص> — نطق النص\n{pn} <النص> | <اللغة> — تحديد لغة أخرى\n◈ قم بالرد على أي رسالة لتوليد صوتها" }
-	},
+  config: {
+    name: "say",
+    aliases: ["tts", "صوت", "نطق"],
+    version: "5.0.0",
+    author: "Fares",
+    countDown: 5,
+    role: 0,
 
-	onStart: async function ({ args, message, event }) {
-		let text, lang = "ar"; // اللغة الافتراضية عربية
+    description: {
+      ar: "تحويل النص إلى صوت روبوت Google مجاني"
+    },
 
-		if (event.type === "message_reply") {
-			text = event.messageReply.body;
-			if (args[0]) {
-				const lcode = (args[0] || "").toLowerCase();
-				lang = LANG_ALIASES[lcode] || lcode;
-			}
-		} else {
-			if (!args.length) return message.reply("⚠️ الرجاء كتابة النص المطلوب أو الرد على رسالة!");
-			if (args.includes("|")) {
-				const parts = args.join(" ").split("|").map(a => a.trim());
-				text = parts[0];
-				const lcode = (parts[1] || "ar").toLowerCase();
-				lang = LANG_ALIASES[lcode] || lcode;
-			} else {
-				text = args.join(" ");
-			}
-		}
+    category: "utility",
 
-		if (!text || !text.trim()) return message.reply("⚠️ لم يتم العثور على أي نص لتحويله.");
-		if (text.length > 500) text = text.slice(0, 500);
+    guide: {
+      ar: "{pn} النص | اللغة"
+    }
+  },
 
-		const tmpPath = `${__dirname}/tmp/tts_${Date.now()}.mp3`;
-		await fs.ensureDir(`${__dirname}/tmp`);
 
-		try {
-			const chunks = text.match(/.{1,150}/g) || [text];
-			for (let i = 0; i < chunks.length; i++) {
-				const res = await axios({
-					method: "get",
-					url: `https://translate.google.com/translate_tts?ie=UTF-8&tl=${lang}&client=gtx&q=${encodeURIComponent(chunks[i])}`,
-					responseType: "stream",
-					headers: {
-						'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
-					}
-				});
-				const writer = fs.createWriteStream(tmpPath, { flags: i === 0 ? "w" : "a" });
-				res.data.pipe(writer);
-				await new Promise(resolve => writer.on("finish", resolve));
-			}
-			await message.reply({ body: `🎙️ تم توليد الصوت بنجاح | اللغة: ${lang}`, attachment: fs.createReadStream(tmpPath) });
-			setTimeout(() => fs.remove(tmpPath).catch(() => {}), 60000);
-		} catch {
-			fs.remove(tmpPath).catch(() => {});
-			return message.reply("❌ حدث خطأ أثناء توليد الصوت، يرجى المحاولة لاحقاً.");
-		}
-	}
+  onStart: async function ({ args, message }) {
+
+    if (!args.length)
+      return message.reply("⚠️ اكتب النص");
+
+
+    let data = args.join(" ").split("|");
+
+    let text = data[0].trim();
+
+    let lang = "ar";
+
+    if (data[1]) {
+      lang =
+      LANGS[data[1].trim().toLowerCase()] || "ar";
+    }
+
+
+    const file =
+    path.join(__dirname, `say_${Date.now()}.mp3`);
+
+
+    function download(url){
+
+      return new Promise((resolve,reject)=>{
+
+        https.get(url,{
+          headers:{
+            "User-Agent":"Mozilla/5.0"
+          }
+        },res=>{
+
+          let chunks=[];
+
+          res.on("data",d=>chunks.push(d));
+
+          res.on("end",()=>{
+
+            resolve(Buffer.concat(chunks));
+
+          });
+
+        }).on("error",reject);
+
+      });
+
+    }
+
+
+    try {
+
+      let parts =
+      text.match(/.{1,150}/g);
+
+
+      let audio=[];
+
+
+      for(let part of parts){
+
+        let url =
+        "https://translate.google.com/translate_tts"+
+        `?ie=UTF-8&q=${encodeURIComponent(part)}&tl=${lang}&client=tw-ob`;
+
+
+        let data =
+        await download(url);
+
+
+        audio.push(data);
+      }
+
+
+      fs.writeFileSync(
+        file,
+        Buffer.concat(audio)
+      );
+
+
+      await message.reply({
+        body:
+        `🤖 تم إنشاء الصوت\n🌐 ${lang}`,
+        attachment:
+        fs.createReadStream(file)
+      });
+
+
+      setTimeout(()=>{
+        fs.unlink(file,()=>{});
+      },60000);
+
+
+    } catch(e){
+
+      console.log(e);
+
+      message.reply(
+        "❌ تعذر إنشاء الصوت"
+      );
+
+    }
+
+  }
 };
