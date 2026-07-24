@@ -4,7 +4,7 @@ module.exports.config = {
     hasPermssion: 0,
     credits: "Fares",
     description: "تحويل النص إلى صوت بشري",
-    commandCategory: "الخدمات الصوتية",
+    commandCategory: "media",
     usages: "[النص]",
     cooldowns: 5
 };
