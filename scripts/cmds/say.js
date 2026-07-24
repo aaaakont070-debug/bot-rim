@@ -1,7 +1,3 @@
-const gtts = require('gtts');
-const fs = require('fs-extra');
-const path = require('path');
-
 export default {
     config: {
         name: "say",
@@ -9,11 +5,11 @@ export default {
         author: "Fares",
         countDown: 5,
         role: 0,
-        shortDescription: "تحويل النص إلى صوت بشري",
-        longDescription: "تحويل النص المدخل إلى بصمة صوتية بشرية واضحة ومجانية بالكامل",
+        shortDescription: "تحويل النص إلى صوت",
+        longDescription: "تحويل النص إلى بصمة صوتية بشرية مجاناً",
         category: "الخدمات الصوتية",
         guide: {
-            ar: "{pn} [النص المراد تحويله]"
+            ar: "{pn} [النص]"
         }
     },
 
@@ -22,35 +18,23 @@ export default {
         const text = args.join(" ");
         
         if (!text) {
-            return api.sendMessage("أهلاً بك يا زميلي، الرجاء كتابة النص المراد تحويله بجانب الأمر.", threadID, messageID);
+            return api.sendMessage("أهلاً بك يا فارس، الرجاء كتابة النص المراد تحويله.", threadID, messageID);
         }
 
         try {
-            await api.sendMessage("🎙️ جاري هندسة الصوت الاحترافي...", threadID, messageID);
+            await api.sendMessage("🎙️ جاري توليد الصوت...", threadID, messageID);
 
-            const fileName = `voice_${Date.now()}.mp3`;
-            const filePath = path.join(__dirname, fileName);
+            // استخدام رابط جوجل TTS المباشر بدون حزم خارجية
+            const encodedText = encodeURIComponent(text);
+            const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=ar&client=tw-ob`;
 
-            const speech = new gtts(text, 'ar');
+            return api.sendMessage({
+                attachment: await global.utils.getStreamFromURL(url)
+            }, threadID, messageID);
 
-            speech.save(filePath, async (err) => {
-                if (err) {
-                    console.error(err);
-                    return api.sendMessage("حدث خطأ أثناء توليد الملف الصوتي.", threadID, messageID);
-                }
-
-                await api.sendMessage({
-                    attachment: fs.createReadStream(filePath)
-                }, threadID, () => {
-                    if (fs.existsSync(filePath)) {
-                        fs.unlinkSync(filePath);
-                    }
-                }, messageID);
-            });
-
-        } chor (error) {
+        } catch (error) {
             console.error(error);
-            return api.sendMessage("حدث خطأ تقني في السيرفر.", threadID, messageID);
+            return api.sendMessage("حدث خطأ في توليد الصوت.", threadID, messageID);
         }
     }
 };
